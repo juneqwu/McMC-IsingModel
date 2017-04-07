@@ -1,0 +1,12 @@
+CC = gcc
+CFLAGS = -fopenmp 
+LDFLAGS = -lm
+EXECS = ising
+
+all: ${EXECS}
+
+ising: ising.c
+	${CC} ${CFLAGS} ising.c -o ising ${LDFLAGS} 
+
+clean:
+	rm -f ${EXECS} {output00.txt output01.txt}
