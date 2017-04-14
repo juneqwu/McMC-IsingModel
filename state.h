@@ -1,8 +1,8 @@
 /* initializes state */
 
-void initialize(int size, double state[size][size], int seed){
+void initialize(int size, double state[size][size]){
   int i, j;
-  srand(seed);
+
   /* initialize boudnary ghost points as 0 */
   for (i = 0; i< size; i++){
     state[i][0] = 0;
@@ -16,7 +16,7 @@ void initialize(int size, double state[size][size], int seed){
   /*initialize other points in the lattice randomly */
   for (i=1; i < size-1; i++){
     for (j = 1; j < size-1; j++){
-      if (rand() % 10 < 5){
+      if (rand() % 10000 / 10000.0 < 0.5){
 	state[i][j] = 1 ;
       }
       else

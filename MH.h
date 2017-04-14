@@ -1,32 +1,41 @@
+#include <time.h>
+
 /*Metropolis Hastings step intra-thread */
 
-void MH(int size, double state[size][size], double new_state[size][size], double beta, int J, int k, int flip){
+int MH(int size, double state[size][size], double new_state[size][size], double beta, int J, int k, int flip){
   int i,j;
   double uniform, like = 0;
   proposal(size, new_state, flip);
   like = exp(-beta*(hamiltonian(size, new_state, J, k) - hamiltonian(size, state,J,k)));
-  uniform = rand() % 1000/1000.0;
-  /*printf("%f \n", uniform);*/
+  /*printf("\nstate: %f \n", hamiltonian(size, state,J,k));
+    printf("new state: %f \n", hamiltonian(size, new_state, J, k));*/
+  uniform = rand() % 10000 / 10000.0;
+  /*printf("random number %f with likelihood %f \n", uniform, like);*/
   if (like > uniform){
     for (i = 0; i< size; i++){
       for (j = 0; j < size; j++){
 	state[i][j] = new_state[i][j];
       }
     }
-    /*printf("Proposal accepted! intra-thread!\n");*/
+    return 1;
+    /*printf("Proposal accepted! intra-thread!\n");
+      print_state(size, state);*/
   }
   else{
+    /*printf("Proposal rejected! intra-thread!\n");
+      print_state(size,new_state);*/
      for (i = 0; i < size; i++){
         for (j = 0; j < size; j++){
             new_state[i][j] = state[i][j];
          }
       }
-     /* printf("Proposal rejected! intra-thread!\n");*/
+     return 0;
   }
+  return 0;
 }
 
 /* Metropolis Hastings step inter-thread */
-void swap(int size, double myself[size*size], double mypartner[size*size], int J, int k, double beta){
+void swap(int size, int nthreads, int my_threadNum, double myself[size*size], double mypartner[size*size], double ks[nthreads], double beta, int J, int k, int partner){
 
   /*cast those two vectors into matrix so that it's easy to compute the hamiltonian */
   double myself_m[size][size], mypartner_m[size][size], temp[size*size];
@@ -52,7 +61,12 @@ void swap(int size, double myself[size*size], double mypartner[size*size], int J
       mypartner_m[i][j] = mypartner[i*size+j];
     }
   }
-  like = exp(beta*(hamiltonian(size, mypartner_m, J, k) - hamiltonian(size, myself_m,J,k)));
+
+  double delta_myself, delta_mypartner;
+  delta_myself = hamiltonian(size, mypartner_m, J, k) - hamiltonian(size, myself_m, J, k);
+  delta_mypartner = hamiltonian(size, myself_m, J, ks[my_threadNum + partner]) - hamiltonian(size, mypartner_m, J, ks[my_threadNum + partner]);
+  like = exp(beta*(delta_mypartner - delta_myself));
+
   /*printf("the likelihood is %f. \n", like);*/
   uniform = rand() % 1000/1000.0;
   /* printf("%f \n", uniform);*/
