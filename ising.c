@@ -3,8 +3,10 @@
    predict critical temperature instead of using different levels of
    temperature in Boltzman distribution. 
 
-   Try it! And it gets "SWEETER AS ITERATIONS GO BY" 
-   (around 5e-6, more around the critical temperature).
+   Try it! And the ising gets sweeter as the iterations go by.
+   (around 1e+6 in the cold temperature; 5e+6 around the hot 
+    temperature).PT is a better sampler for the cold and the 
+   critical temperature.
 
    Author: June Wu */
 
