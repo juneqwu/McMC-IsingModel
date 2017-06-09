@@ -1,3 +1,4 @@
+#include "clcg4.h"
 /* initializes state */
 
 void initialize(int size, double state[size][size]){
@@ -16,7 +17,7 @@ void initialize(int size, double state[size][size]){
   /*initialize other points in the lattice randomly */
   for (i=1; i < size-1; i++){
     for (j = 1; j < size-1; j++){
-      if (rand() % 10000 / 10000.0 < 0.5){
+      if (GenVal(omp_get_thread_num()) < 0.5){
 	state[i][j] = 1 ;
       }
       else
@@ -29,8 +30,8 @@ void initialize(int size, double state[size][size]){
 void proposal(int size, double new_state[size][size], int flip){
   int i;
   for (i = 0; i < flip; i++){
-    int m = rand() % (size-2) + 1;
-    int n = rand() % (size-2) + 1;
+    int m = GenVal(omp_get_thread_num()) * ((size-2) + 1);
+    int n = GenVal(omp_get_thread_num()) * ((size-2) + 1);
     /*printf("flip (%d, %d).\n",m,n);*/
     new_state[m][n] = new_state[m][n]* (-1);
   }

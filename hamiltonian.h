@@ -19,7 +19,7 @@ double hamiltonian(int size, double sigma[size][size], double J, double k){
   int i,j;
   double hamiltonian = 0;
   /*pulling bdy points to the ghost points to form periodic bdy condition */
-  
+
   /*left-most and right-most columns*/
   for (i = 1; i < size-1; i++){
       sigma[0][i] = sigma[size-2][i];

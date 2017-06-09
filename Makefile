@@ -6,7 +6,7 @@ EXECS = ising
 all: ${EXECS}
 
 ising: ising.c
-	${CC} ${CFLAGS} -std=c99 ising.c -o ising ${LDFLAGS} 
+	${CC} ${CFLAGS} -std=c99 ising.c clcg4.c -o ising ${LDFLAGS} 
 
 clean:
 

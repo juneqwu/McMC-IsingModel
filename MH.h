@@ -1,15 +1,18 @@
 #include <time.h>
+#include "clcg4.h"
 
 /*Metropolis Hastings step intra-thread */
 
-int MH(int size, double state[size][size], double new_state[size][size], double beta, int J, int k, int flip){
+extern int accepts;
+
+int MH(int size, double state[size][size], double new_state[size][size], double beta, double J, double k, int flip){
   int i,j;
   double uniform, like = 0;
   proposal(size, new_state, flip);
   like = exp(-beta*(hamiltonian(size, new_state, J, k) - hamiltonian(size, state,J,k)));
   /*printf("\nstate: %f \n", hamiltonian(size, state,J,k));
     printf("new state: %f \n", hamiltonian(size, new_state, J, k));*/
-  uniform = rand() % 10000 / 10000.0;
+  uniform = GenVal(omp_get_thread_num());
   /*printf("random number %f with likelihood %f \n", uniform, like);*/
   if (like > uniform){
     for (i = 0; i< size; i++){
@@ -35,7 +38,7 @@ int MH(int size, double state[size][size], double new_state[size][size], double 
 }
 
 /* Metropolis Hastings step inter-thread */
-void swap(int size, int nthreads, int my_threadNum, double myself[size*size], double mypartner[size*size], double ks[nthreads], double beta, int J, int k, int partner){
+void swap(int size, int nthreads, int my_threadNum, double myself[size*size], double mypartner[size*size], double ks[nthreads], double J, double k, double beta, int partner){
 
   /*cast those two vectors into matrix so that it's easy to compute the hamiltonian */
   double myself_m[size][size], mypartner_m[size][size], temp[size*size];
@@ -64,13 +67,17 @@ void swap(int size, int nthreads, int my_threadNum, double myself[size*size], do
 
   double delta_myself, delta_mypartner;
   delta_myself = hamiltonian(size, mypartner_m, J, k) - hamiltonian(size, myself_m, J, k);
-  delta_mypartner = hamiltonian(size, myself_m, J, ks[my_threadNum + partner]) - hamiltonian(size, mypartner_m, J, ks[my_threadNum + partner]);
+  delta_mypartner = hamiltonian(size, mypartner_m, J, ks[my_threadNum + partner]) - hamiltonian(size, myself_m, J, ks[my_threadNum + partner]);
+  /*printf("%f, \n",delta_mypartner-delta_myself);*/
   like = exp(beta*(delta_mypartner - delta_myself));
 
   /*printf("the likelihood is %f. \n", like);*/
-  uniform = rand() % 1000/1000.0;
+  /*uniform = rand() % 1000/1000.0;*/
+  uniform = GenVal(my_threadNum);
   /* printf("%f \n", uniform);*/
+  /*printf("%f, %f, %d \n",like,uniform,my_threadNum);*/
   if (like > uniform){
+    accepts +=1;
     for (i = 0; i< size*size; i++){
       temp[i] = myself[i];
       myself[i] = mypartner[i];
