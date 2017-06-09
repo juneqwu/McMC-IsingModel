@@ -68,14 +68,12 @@ void swap(int size, int nthreads, int my_threadNum, double myself[size*size], do
   double delta_myself, delta_mypartner;
   delta_myself = hamiltonian(size, mypartner_m, J, k) - hamiltonian(size, myself_m, J, k);
   delta_mypartner = hamiltonian(size, mypartner_m, J, ks[my_threadNum + partner]) - hamiltonian(size, myself_m, J, ks[my_threadNum + partner]);
-  /*printf("%f, \n",delta_mypartner-delta_myself);*/
+
   like = exp(beta*(delta_mypartner - delta_myself));
 
-  /*printf("the likelihood is %f. \n", like);*/
-  /*uniform = rand() % 1000/1000.0;*/
+
   uniform = GenVal(my_threadNum);
-  /* printf("%f \n", uniform);*/
-  /*printf("%f, %f, %d \n",like,uniform,my_threadNum);*/
+
   if (like > uniform){
     accepts +=1;
     for (i = 0; i< size*size; i++){
@@ -83,6 +81,5 @@ void swap(int size, int nthreads, int my_threadNum, double myself[size*size], do
       myself[i] = mypartner[i];
       mypartner[i] = temp[i];
       }
-    /* printf("Proposal accepted! inter-thread!\n");*/
   }
 }
